@@ -9,14 +9,13 @@ import com.medise.bashga.domain.model.PersonEntity
 
 @Database(
     entities = [PersonEntity::class],
-    version = 2,
+    version = 1,
     exportSchema = false,
 )
 @TypeConverters(DateTimeConverter::class)
 abstract class PersonDataBase:RoomDatabase() {
 
     abstract fun personDao():PersonDao
-
 
     companion object{
         const val DB_NAME = "GYM_DB"

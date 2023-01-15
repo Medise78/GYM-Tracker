@@ -1,13 +1,11 @@
 package com.medise.bashga.domain.model
 
-import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.medise.bashga.data.converter.DateTimeConverter
 import com.medise.bashga.util.ActivityPerson
-import java.time.LocalDate
 import java.util.UUID
 
 @Entity(
@@ -23,8 +21,8 @@ data class PersonEntity(
     val name: String? = null,
     @ColumnInfo(name = "l_name")
     val lastName: String? = null,
-    @ColumnInfo(name = "is_active")
-    val isActive: Boolean? = null,
+    @ColumnInfo(name = "is_half_price")
+    val isHalfPrice: Boolean? = null,
     @TypeConverters(DateTimeConverter::class)
     @ColumnInfo(name = "start_day")
     var startDay: String? = null,

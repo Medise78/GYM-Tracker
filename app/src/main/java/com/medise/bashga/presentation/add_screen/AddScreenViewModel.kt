@@ -1,13 +1,11 @@
 package com.medise.bashga.presentation.add_screen
 
-import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medise.bashga.data.repository.GymRepository
 import com.medise.bashga.domain.model.PersonEntity
-import com.medise.bashga.util.ActivityPerson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,6 +19,7 @@ class AddScreenViewModel @Inject constructor(
 
     val fName = MutableLiveData("")
     val lName = MutableLiveData("")
+    val checkState = mutableStateOf(false)
 
     private val _sharedFlow = MutableSharedFlow<UiEvent>()
     val sharedFlow = _sharedFlow.asSharedFlow()

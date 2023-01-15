@@ -56,7 +56,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.time.Duration.Companion.days
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -74,6 +76,11 @@ fun AddScreen(
     val date = DateConverterToPersian()
     val date2 = DateConverterToPersian()
 
+    date.GregorianToPersian(
+        Calendar.YEAR,
+        Calendar.MONTH,
+        Calendar.DAY_OF_MONTH
+    )
 
     date.GregorianToPersian(
         LocalDate.now().year,
@@ -107,9 +114,6 @@ fun AddScreen(
         mutableStateOf(Color.Red)
     }
 
-    var s by remember {
-        mutableStateOf(false)
-    }
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -118,6 +122,9 @@ fun AddScreen(
         mutableStateOf<Bitmap?>(null)
     }
 
+    var checkState by remember {
+        mutableStateOf(false)
+    }
 
     val imageCrop = rememberLauncherForActivityResult(
         contract =
@@ -265,6 +272,36 @@ fun AddScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
+                    .clickable {
+                        checkState = !checkState
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    Checkbox(checked = checkState, onCheckedChange = { checkState = !checkState })
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(end = 5.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(text = "عضو بسیج", textAlign = TextAlign.End)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             ) {
                 Button(
                     onClick = { openDialog.value = true },
@@ -279,6 +316,8 @@ fun AddScreen(
                 }
             }
 
+
+
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = {
@@ -289,27 +328,29 @@ fun AddScreen(
                     } else {
                         val start = LocalDate.parse(
                             "$day/$month/$year", DateTimeFormatter.ofPattern("d/M/yyyy")
-                        ).toString()
+                        )
                         val end = LocalDate.parse(
                             "$day/$month/$year", DateTimeFormatter.ofPattern("d/M/yyyy")
-                        ).plusDays(31).toString()
-
-
+                        ).plusMonths(1)
 
                         date2.GregorianToPersian(year.toInt(), month.toInt(), day.toInt())
                         viewModel.addPerson(
                             PersonEntity(
                                 name = fName.value,
                                 lastName = lName.value,
-                                startDay = start,
-                                endDay = end,
+                                startDay = start.toString(),
+                                endDay = end.toString(),
                                 payStatus = pay,
                                 isPayed = payStatus,
                                 personImage = imageUri.toString(),
-                                remainDate = Period.between(
-                                    LocalDate.of(date.year, date.month, date.day),
-                                    LocalDate.parse(end)
-                                ).days.toString()
+                                remainDate = ChronoUnit.DAYS.between(
+                                    LocalDate.of(
+                                        date.year,
+                                        date.month,
+                                        date.day
+                                    ), end
+                                ).toString(),
+                                isHalfPrice = checkState
                             )
                         )
                     }

@@ -20,6 +20,7 @@ import com.medise.bashga.util.ActivityPerson
 import com.medise.bashga.util.DateConverterToPersian
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.Period
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -31,10 +32,17 @@ fun DatePayExpired(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val dateConverterToPersian = DateConverterToPersian()
+    val date = DateConverterToPersian()
 
     var expandedState by remember {
         mutableStateOf(false)
     }
+
+    date.GregorianToPersian(
+        LocalDate.now().year,
+        LocalDate.now().monthValue,
+        LocalDate.now().dayOfMonth
+    )
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Scaffold(
@@ -50,7 +58,7 @@ fun DatePayExpired(
                 LocalDate.now().dayOfMonth
             )
             val personFilter = state.filter {
-                !it.isPayed!! || LocalDate.parse(it.endDay).isBefore(
+                LocalDate.parse(it.endDay).isBefore(
                     LocalDate.of(
                         dateConverterToPersian.year,
                         dateConverterToPersian.month,
@@ -78,10 +86,17 @@ fun DatePayExpired(
                         onPositiveClick = {
                             viewModel.updatePerson(
                                 person.copy(
-                                    startDay = LocalDate.parse(person.startDay)?.plusDays(31).toString(),
-                                    endDay = LocalDate.parse(person.endDay).plusDays(31).toString(),
+                                    startDay = LocalDate.parse(person.startDay)?.plusMonths(1).toString(),
+                                    endDay = LocalDate.parse(person.endDay).plusMonths(1).toString(),
                                     payStatus = ActivityPerson.PAID,
-                                    isPayed = true
+                                    isPayed = true,
+                                    remainDate = Period.between(
+                                        LocalDate.of(date.year, date.month, date.day),
+                                        LocalDate.parse(
+                                            LocalDate.parse(person.endDay).plusMonths(1)
+                                                .toString()
+                                        )
+                                    ).days.toString()
                                 )
                             )
                         }

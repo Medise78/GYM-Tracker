@@ -1,15 +1,19 @@
 package com.medise.bashga.domain.repository
 
+import android.content.Context
+import android.content.SharedPreferences
 import com.medise.bashga.data.dao.PersonDao
 import com.medise.bashga.data.repository.GymRepository
 import com.medise.bashga.domain.model.PersonEntity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
 class GymRepositoryImpl @Inject constructor(
-    private val dao: PersonDao
+    private val dao: PersonDao,
 ) : GymRepository {
+
     override suspend fun insertPerson(person: PersonEntity) {
         dao.insertPerson(person)
     }

@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -18,15 +21,18 @@ import com.medise.bashga.BottomNav
 import com.medise.bashga.presentation.home_screen.PersonCard
 import com.medise.bashga.util.ActivityPerson
 import com.medise.bashga.util.DateConverterToPersian
+import com.medise.bashga.util.showNotification
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.Period
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpiredPerson(
     viewModel: ExpiredViewModel = hiltViewModel(),
-    navController: NavController
+    navController: NavController,
 ) {
     val state = viewModel.state.value
     val scaffoldState = rememberScaffoldState()
@@ -38,6 +44,13 @@ fun ExpiredPerson(
     }
 
     viewModel.fetch()
+
+    date.GregorianToPersian(
+        LocalDate.now().year,
+        LocalDate.now().monthValue,
+        LocalDate.now().dayOfMonth
+    )
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Scaffold(
             scaffoldState = scaffoldState,
@@ -47,11 +60,6 @@ fun ExpiredPerson(
         ) { paddingValues ->
             paddingValues.calculateBottomPadding()
 
-            date.GregorianToPersian(
-                LocalDate.now().year,
-                LocalDate.now().monthValue,
-                LocalDate.now().dayOfMonth
-            )
             LazyColumn(contentPadding = PaddingValues(bottom = 65.dp)) {
                 val p = state.filter {
                     LocalDate.parse(it.endDay)?.isEqual(
@@ -63,6 +71,7 @@ fun ExpiredPerson(
                     ) == true
                 }
                 items(p) { persons ->
+
                     persons.payStatus = ActivityPerson.NOTPAID
                     PersonCard(
                         title = "وضعیت پرداخت:",
@@ -71,19 +80,26 @@ fun ExpiredPerson(
                         person = persons,
                         shape = RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp),
                         onPositiveClick = {
-                            scope.launch {
-                                viewModel.updatePerson(
-                                    persons.copy(
-                                        name = persons.name,
-                                        lastName = persons.lastName,
-                                        startDay = LocalDate.parse(persons.startDay)?.plusDays(31).toString(),
-                                        endDay = LocalDate.parse(persons.endDay).plusDays(31).toString(),
-                                        payStatus = ActivityPerson.NOTPAID,
-                                        isPayed = true,
-                                        personImage = persons.personImage
-                                    )
+                            viewModel.updatePerson(
+                                persons.copy(
+                                    name = persons.name,
+                                    lastName = persons.lastName,
+                                    startDay = LocalDate.parse(persons.startDay)?.plusMonths(1)
+                                        .toString(),
+                                    endDay = LocalDate.parse(persons.endDay).plusMonths(1)
+                                        .toString(),
+                                    payStatus = ActivityPerson.PAID,
+                                    isPayed = true,
+                                    personImage = persons.personImage,
+                                    remainDate = ChronoUnit.DAYS.between(
+                                        LocalDate.of(date.year, date.month, date.day),
+                                        LocalDate.parse(
+                                            LocalDate.parse(persons.endDay).plusMonths(1)
+                                                .toString()
+                                        )
+                                    ).toString()
                                 )
-                            }
+                            )
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar("${persons.name} تمدید شد")
                             }

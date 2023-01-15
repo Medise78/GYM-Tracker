@@ -1,13 +1,13 @@
-@file:OptIn(ExperimentalGlideComposeApi::class)
-
 package com.medise.bashga.presentation.home_screen
 
+import android.graphics.ColorSpace
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +25,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -46,10 +48,14 @@ import com.google.gson.reflect.TypeToken
 import com.medise.bashga.BottomNav
 import com.medise.bashga.R
 import com.medise.bashga.domain.model.PersonEntity
+import com.medise.bashga.presentation.expierd_person.ExpiredViewModel
 import com.medise.bashga.util.ActivityPerson
 import com.medise.bashga.util.DateConverterToPersian
 import com.medise.bashga.util.Routes
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.lang.reflect.Type
+import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -59,6 +65,7 @@ import java.util.*
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController,
+    expiredViewModel: ExpiredViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
     val scaffoldState = rememberScaffoldState()
@@ -125,16 +132,18 @@ fun HomeScreen(
                 },
                 onItem2Click = {
                     importDataLauncher.launch(arrayOf("*/*"))
-                }
+                },
+                onItem3Click = {
+
+                },
+                viewModel = viewModel,
+                expiredViewModel = expiredViewModel
             )
         }
     ) { paddingValues ->
         paddingValues.toString()
-        if (state.success.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "بدون عضو", style = MaterialTheme.typography.h6)
-            }
-        } else {
+        if (state.success.isNotEmpty()) {
+
             val persons =
                 state.success.filter { it.name?.contains(searchText, ignoreCase = true) == true }
 
@@ -148,11 +157,14 @@ fun HomeScreen(
                     }) {}
                 }
                 items(persons) { items ->
-                    if (items.remainDate?.toInt()?.equals(0) == true) {
-                        PersonCard(
-                            person = items.copy(
+                    if (items.remainDate?.toInt()!! <= 0) {
+                        viewModel.updatePerson(
+                            items.copy(
                                 payStatus = ActivityPerson.NOTPAID
-                            ), shape = RoundedCornerShape(20.dp)
+                            )
+                        )
+                        PersonCard(
+                            person = items, shape = RoundedCornerShape(20.dp)
                         ) {
                             viewModel.deletePerson(items)
                             Toast.makeText(context, "${items.name} حذف شد", Toast.LENGTH_SHORT)
@@ -167,11 +179,14 @@ fun HomeScreen(
                     }
                 }
             }
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "بدون عضو", style = MaterialTheme.typography.h6)
+            }
         }
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PersonCard(
@@ -208,20 +223,25 @@ fun PersonCard(
             shape = shape,
             elevation = 10.dp,
             backgroundColor = Color.White,
+            border = if (person.isHalfPrice == true) BorderStroke(
+                2.dp,
+                Color.Green.copy(0.5f)
+            ) else BorderStroke(0.dp, MaterialTheme.colors.background)
         ) {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(25.dp)
                 ) {
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f)
                     ) {
                         Row(modifier = Modifier.fillMaxWidth()) {
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -230,7 +250,9 @@ fun PersonCard(
                             ) {
                                 Row {
                                     Image(
-                                        painter = rememberImagePainter(data = person.personImage?:R.drawable.person),
+                                        painter = rememberImagePainter(
+                                            data = person.personImage ?: R.drawable.person
+                                        ),
                                         contentDescription = "Person-Image",
                                         modifier = Modifier
                                             .width(50.dp)
@@ -240,7 +262,6 @@ fun PersonCard(
                                             .border(1.dp, Color.Black, CircleShape),
                                         contentScale = ContentScale.Crop,
                                     )
-
 
                                     Spacer(modifier = Modifier.padding(end = 15.dp))
                                     Text(
@@ -255,6 +276,7 @@ fun PersonCard(
                                     )
                                 }
                             }
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -413,10 +435,17 @@ fun SearchBox(
 fun TopAppBarCustom(
     onItem1Click: () -> Unit,
     onItem2Click: () -> Unit,
+    onItem3Click: () -> Unit,
+    viewModel: HomeViewModel,
+    expiredViewModel: ExpiredViewModel
 ) {
 
     var expand by remember {
         mutableStateOf(false)
+    }
+
+    var isAlarmEnable by remember {
+        mutableStateOf(viewModel.getAlarmState())
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -443,21 +472,101 @@ fun TopAppBarCustom(
                 if (expand) {
                     DropdownMenu(expanded = expand, onDismissRequest = { expand = false }) {
                         DropdownMenuItem(onClick = { onItem1Click();expand = false }) {
-                            Row {
-                                Text(text = "بک اپ")
-                                Icon(
-                                    imageVector = Icons.Default.Build,
-                                    contentDescription = "backup"
-                                )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(text = "بک اپ")
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Build,
+                                        contentDescription = "backup",
+                                        modifier = Modifier.clickable {
+                                            expand = false
+                                        }
+                                    )
+                                }
                             }
                         }
                         DropdownMenuItem(onClick = { onItem2Click();expand = false }) {
-                            Row {
-                                Text(text = "برگرداندن اطلاعات")
-                                Icon(
-                                    imageVector = Icons.Default.Build,
-                                    contentDescription = "backup"
-                                )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(text = "برگرداندن اطلاعات")
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Build,
+                                        contentDescription = "backup",
+                                        modifier = Modifier.clickable {
+                                            expand = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        DropdownMenuItem(onClick = {}) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(text = "هشدار")
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Checkbox(
+                                        checked = isAlarmEnable,
+                                        onCheckedChange = {
+                                            if (viewModel.getAlarmState()) {
+                                                isAlarmEnable = !isAlarmEnable
+                                                viewModel.setAlarmState(false)
+                                                expiredViewModel.clearRepeating()
+                                            } else {
+                                                viewModel.setAlarmState(true)
+                                                isAlarmEnable = !isAlarmEnable
+                                                expiredViewModel.scheduleRepeatingAlarm()
+                                            }
+                                            expand = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
