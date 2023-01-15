@@ -41,7 +41,13 @@
             android:name="com.canhub.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
 
-        <receiver android:name=".receiver.InexactAlarmBroadcastReceiver" />
+        <receiver android:name=".receiver.InexactAlarmBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

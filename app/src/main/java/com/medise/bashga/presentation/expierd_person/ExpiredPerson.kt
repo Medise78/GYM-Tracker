@@ -6,12 +6,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -21,10 +18,8 @@ import com.medise.bashga.BottomNav
 import com.medise.bashga.presentation.home_screen.PersonCard
 import com.medise.bashga.util.ActivityPerson
 import com.medise.bashga.util.DateConverterToPersian
-import com.medise.bashga.util.showNotification
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.Period
 import java.time.temporal.ChronoUnit
 import java.util.*
 

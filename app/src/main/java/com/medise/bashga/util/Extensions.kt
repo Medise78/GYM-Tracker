@@ -7,7 +7,6 @@ import com.medise.bashga.domain.model.PersonEntity
 import java.text.DecimalFormat
 import java.util.*
 
-val persons = listOf<PersonEntity>()
 
 fun String.isValidHour(is24HourFormat: Boolean = true): Boolean = this.toIntOrNull().let {
     if (is24HourFormat) {

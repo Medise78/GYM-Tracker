@@ -1,6 +1,5 @@
 package com.medise.bashga.presentation.home_screen
 
-import android.graphics.ColorSpace
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,9 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -42,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.medise.bashga.BottomNav
@@ -52,10 +48,7 @@ import com.medise.bashga.presentation.expierd_person.ExpiredViewModel
 import com.medise.bashga.util.ActivityPerson
 import com.medise.bashga.util.DateConverterToPersian
 import com.medise.bashga.util.Routes
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.lang.reflect.Type
-import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -132,9 +125,6 @@ fun HomeScreen(
                 },
                 onItem2Click = {
                     importDataLauncher.launch(arrayOf("*/*"))
-                },
-                onItem3Click = {
-
                 },
                 viewModel = viewModel,
                 expiredViewModel = expiredViewModel
@@ -435,7 +425,6 @@ fun SearchBox(
 fun TopAppBarCustom(
     onItem1Click: () -> Unit,
     onItem2Click: () -> Unit,
-    onItem3Click: () -> Unit,
     viewModel: HomeViewModel,
     expiredViewModel: ExpiredViewModel
 ) {

@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.medise.bashga.MainActivity
 import com.medise.bashga.R
-import com.medise.bashga.domain.model.PersonEntity
 
 fun showNotification(
     context: Context,

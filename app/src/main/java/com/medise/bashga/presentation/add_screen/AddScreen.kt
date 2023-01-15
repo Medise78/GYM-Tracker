@@ -54,11 +54,9 @@ import com.medise.bashga.util.DateConverterToPersian
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
-import kotlin.time.Duration.Companion.days
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
