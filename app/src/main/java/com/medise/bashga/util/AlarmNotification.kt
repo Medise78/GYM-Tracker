@@ -44,6 +44,7 @@ fun showNotification(
         .setGroup(channelName)
         .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
         .setGroupSummary(true)
+        .setAutoCancel(true)
     val notification = notificationBuilder.build()
     val notificationManager = context.getSystemService(NotificationManager::class.java)
 
