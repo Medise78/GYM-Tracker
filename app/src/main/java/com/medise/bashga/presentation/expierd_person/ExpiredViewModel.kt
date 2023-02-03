@@ -2,6 +2,7 @@ package com.medise.bashga.presentation.expierd_person
 
 import android.app.AlarmManager
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -37,6 +38,7 @@ class ExpiredViewModel @Inject constructor(
             try {
                 _state.value = it
             } catch (e: Exception) {
+                Log.e("Error" , e.localizedMessage.toString())
             }
         }.launchIn(viewModelScope)
     }

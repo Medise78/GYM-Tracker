@@ -7,6 +7,10 @@ import com.medise.bashga.domain.model.PersonEntity
 import java.text.DecimalFormat
 import java.util.*
 
+const val channelId = "gym_push"
+const val channelName = "gymPush"
+const val notificationId = 1000
+const val FB_TOKEN_NAME = ""
 
 fun String.isValidHour(is24HourFormat: Boolean = true): Boolean = this.toIntOrNull().let {
     if (is24HourFormat) {

@@ -1,8 +1,10 @@
 package com.medise.bashga.util
 
+import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -60,4 +62,42 @@ fun showNotification(
     }
 
     notificationManager.notify(notificationId, notification)
+}
+
+fun showPushNotification(
+    context: Context,
+    channelId:String,
+    channelName:String,
+    notificationId:Int,
+    title:String,
+    description: String
+){
+    val intent = Intent(context,MainActivity::class.java)
+    val pendingIntent = PendingIntent.getActivity(
+        context,
+        1,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    val notificationBuilder = NotificationCompat.Builder(context , channelId)
+        .setSmallIcon(R.drawable.gym)
+        .setContentTitle(title)
+        .setContentIntent(pendingIntent)
+        .setContentText(description)
+        .setAutoCancel(true)
+    val notification = notificationBuilder.build()
+    val notificationManager = context.getSystemService(NotificationManager::class.java)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationManager.getNotificationChannel(channelId) == null){
+        notificationManager.createNotificationChannel(
+            NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+        )
+    }
+    notificationManager.notify(
+        notificationId,notification
+    )
 }
