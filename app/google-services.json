@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "88225246692",
+    "project_id": "gymtracker-7a88d",
+    "storage_bucket": "gymtracker-7a88d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88225246692:android:08ae96976cc6077de4abf1",
+        "android_client_info": {
+          "package_name": "com.medise.bashga"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "88225246692-rhnst7s4mgppr4s9d2om4itpf2jpfc2j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.medise.bashga",
+            "certificate_hash": "d3ddf3e6269cdfa728d124f66781b12bd23a6b4b"
+          }
+        },
+        {
+          "client_id": "88225246692-5jh1a5ndjqv80gp3buv2c8d9ao980bb8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvz1lm8sBLZUC67Z7ii-jKm49LJJzVSLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "88225246692-5jh1a5ndjqv80gp3buv2c8d9ao980bb8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
